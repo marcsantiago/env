@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Var reads an environment variable as a string.
@@ -83,7 +84,7 @@ func VarAsInt64(envVarName string, defaultValue int64) int64 {
 	return iv
 }
 
-// MandatoryVar is the Mandatory version of VarAsInt64.
+// MandatoryVarAsInt64 is the Mandatory version of VarAsInt64.
 func MandatoryVarAsInt64(envVarName string) int64 {
 	str := MandatoryVar(envVarName)
 	v, err := strconv.ParseInt(str, 10, 64)
@@ -92,6 +93,29 @@ func MandatoryVarAsInt64(envVarName string) int64 {
 	}
 
 	return v
+}
+
+// VarAsStringSlice reads an environment variable as a []string
+func VarAsStringSlice(envVarName string, defaultValue []string, deliminator rune) []string {
+	v := os.Getenv(envVarName)
+	if len(v) == 0 {
+		return defaultValue
+	}
+
+	if vv := strings.Split(v, string(deliminator)); len(vv) > 0 {
+		return vv
+	}
+	return defaultValue
+}
+
+// MandatoryVarAsStringSlice is the Mandatory version of VarAsStringSlice.
+func MandatoryVarAsStringSlice(envVarName string, deliminator rune) []string {
+	str := MandatoryVar(envVarName)
+	vv := strings.Split(str, string(deliminator))
+	if len(vv) == 0 {
+		panic(fmt.Sprintf("Invalid []string value for env var name %s value %s", envVarName, str))
+	}
+	return vv
 }
 
 func getVar(name, defaultValue string, warn bool) string {

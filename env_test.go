@@ -2,7 +2,9 @@ package env
 
 import (
 	"os"
+	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -427,6 +429,101 @@ func TestVarAsInt64(t *testing.T) {
 
 			if got := VarAsInt64(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
 				t.Errorf("VarAsInt64() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestVarAsStringSlice(t *testing.T) {
+	type args struct {
+		envVarName   string
+		defaultValue []string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		shouldSet bool
+		want      []string
+	}{
+		{
+			name: "should return default value",
+			args: args{
+				envVarName:   "SLICE",
+				defaultValue: []string{"foo"},
+			},
+			want: []string{"foo"},
+		},
+		{
+			name: "should retrieve value",
+			args: args{
+				envVarName:   "SLICE",
+				defaultValue: []string{"foo"},
+			},
+			shouldSet: true,
+			want:      []string{"1", "2", "3"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.shouldSet {
+				os.Setenv(tt.args.envVarName, strings.Join(tt.want, ","))
+				t.Cleanup(func() {
+					os.Unsetenv(tt.args.envVarName)
+				})
+			}
+
+			if got := VarAsStringSlice(tt.args.envVarName, tt.args.defaultValue, ','); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("VarAsStringSlice() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMandatoryVarAsStringSlice(t *testing.T) {
+	type args struct {
+		envVarName string
+	}
+	tests := []struct {
+		name        string
+		args        args
+		shouldSet   bool
+		shouldPanic bool
+		want        []string
+	}{
+		{
+			name: "should panic env is missing",
+			args: args{
+				envVarName: "MANDATORY_SLICE",
+			},
+			shouldPanic: true,
+		},
+		{
+			name: "should retrieve value",
+			args: args{
+				envVarName: "MANDATORY_SLICE",
+			},
+			shouldSet:   true,
+			shouldPanic: false,
+			want:        []string{"1", "2", "3"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.shouldSet {
+				os.Setenv(tt.args.envVarName, strings.Join(tt.want, ","))
+				t.Cleanup(func() {
+					os.Unsetenv(tt.args.envVarName)
+				})
+			}
+
+			defer func(t *testing.T, shouldPanic bool) {
+				if r := recover(); r == nil && shouldPanic {
+					t.Fatal("MandatoryVarAsInt64 should panic", r)
+				}
+			}(t, tt.shouldPanic)
+
+			if got := MandatoryVarAsStringSlice(tt.args.envVarName, ','); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("MandatoryVarAsStringSlice() = %v, want %v", got, tt.want)
 			}
 		})
 	}
