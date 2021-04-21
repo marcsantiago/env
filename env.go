@@ -118,6 +118,19 @@ func MandatoryVarAsStringSlice(envVarName string, deliminator rune) []string {
 	return vv
 }
 
+// VarAsFloat64 reads an environment variable as a 64 bit float.
+func VarAsFloat64(envVarName string, defaultValue float64) float64 {
+	v := os.Getenv(envVarName)
+	if len(v) == 0 {
+		return defaultValue
+	}
+	iv, err := strconv.ParseFloat(v, 64)
+	if err != nil {
+		return defaultValue
+	}
+	return iv
+}
+
 func getVar(name, defaultValue string, warn bool) string {
 	v := os.Getenv(name)
 	if len(v) == 0 {

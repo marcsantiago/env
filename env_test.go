@@ -529,6 +529,51 @@ func TestMandatoryVarAsStringSlice(t *testing.T) {
 	}
 }
 
+func TestVarAsFloat64(t *testing.T) {
+	type args struct {
+		envVarName   string
+		defaultValue float64
+	}
+	tests := []struct {
+		name      string
+		args      args
+		shouldSet bool
+		want      float64
+	}{
+		{
+			name: "should return default value",
+			args: args{
+				envVarName:   "FLOAT64",
+				defaultValue: 10.23,
+			},
+			want: 10.23,
+		},
+		{
+			name: "should return os value",
+			args: args{
+				envVarName:   "FLOAT64",
+				defaultValue: 10.23,
+			},
+			want:      0.08,
+			shouldSet: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.shouldSet {
+				os.Setenv(tt.args.envVarName, strconv.FormatFloat(tt.want, 'f', 3, 64))
+				t.Cleanup(func() {
+					os.Unsetenv(tt.args.envVarName)
+				})
+			}
+
+			if got := VarAsFloat64(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
+				t.Errorf("VarAsFloat64() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_getVar(t *testing.T) {
 	type args struct {
 		envVarName   string
