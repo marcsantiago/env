@@ -10,15 +10,29 @@ import (
 	"strings"
 )
 
+type flag byte
+
+const (
+	ignore flag = 1 << iota
+	warn
+	redact
+)
+
 // Var reads an environment variable as a string.
 func Var(envVarName, defaultValue string) string {
-	return getVar(envVarName, defaultValue, false)
+	return getVar(envVarName, defaultValue, ignore)
 }
 
 // ImportantVar reads an environment variable as a string, emitting a warning
 // when one is not available and it is forced to return the fallback value.
 func ImportantVar(envVarName, defaultValue string) string {
-	return getVar(envVarName, defaultValue, true)
+	return getVar(envVarName, defaultValue, warn)
+}
+
+// ImportantVarRedacted reads an environment variable as a string, emitting a warning
+// when one is not available and it is forced to return the fallback value as [REDACTED].
+func ImportantVarRedacted(envVarName, defaultValue string) string {
+	return getVar(envVarName, defaultValue, warn|redact)
 }
 
 // MandatoryVar reads an environment variable as a string, emitting a fatal
@@ -131,13 +145,24 @@ func VarAsFloat64(envVarName string, defaultValue float64) float64 {
 	return iv
 }
 
-func getVar(name, defaultValue string, warn bool) string {
+func getVar(name, defaultValue string, f flag) string {
 	v := os.Getenv(name)
-	if len(v) == 0 {
-		if warn {
-			log.Println("Using fallback default value for env var.", "var", name, "default", defaultValue)
-		}
-		return defaultValue
+
+	if len(v) != 0 {
+		return v
 	}
-	return v
+
+	if f&warn != 0 {
+		def := defaultValue
+		if f&redact != 0 {
+			def = "[REDACTED]"
+		}
+
+		log.Println("Using fallback default value for env var.",
+			"var", name,
+			"default", def,
+		)
+	}
+
+	return defaultValue
 }
