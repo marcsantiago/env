@@ -40,13 +40,58 @@ func TestImportantVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, tt.want)
+				_ = os.Setenv(tt.args.envVarName, tt.want)
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
 			if got := ImportantVar(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
+				t.Errorf("ImportantVar() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestImportantVarRedacted(t *testing.T) {
+	type args struct {
+		envVarName   string
+		defaultValue string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		shouldSet bool
+		want      string
+	}{
+		{
+			name: "should return default value",
+			args: args{
+				envVarName:   "IMPORTANT_VAR",
+				defaultValue: "foobar",
+			},
+			want: "foobar",
+		},
+		{
+			name: "should return os file",
+			args: args{
+				envVarName:   "IMPORTANT_VAR",
+				defaultValue: "foobar",
+			},
+			want:      "candyland",
+			shouldSet: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.shouldSet {
+				_ = os.Setenv(tt.args.envVarName, tt.want)
+				t.Cleanup(func() {
+					_ = os.Unsetenv(tt.args.envVarName)
+				})
+			}
+
+			if got := ImportantVarRedacted(tt.args.envVarName, tt.args.defaultValue); got != tt.want {
 				t.Errorf("ImportantVar() = %v, want %v", got, tt.want)
 			}
 		})
@@ -85,9 +130,9 @@ func TestMandatoryVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, tt.want)
+				_ = os.Setenv(tt.args.envVarName, tt.want)
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -135,9 +180,9 @@ func TestMandatoryVarAsBool(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.FormatBool(tt.want))
+				_ = os.Setenv(tt.args.envVarName, strconv.FormatBool(tt.want))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -185,9 +230,9 @@ func TestMandatoryVarAsInt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.Itoa(tt.want))
+				_ = os.Setenv(tt.args.envVarName, strconv.Itoa(tt.want))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -235,9 +280,9 @@ func TestMandatoryVarAsInt64(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.Itoa(int(tt.want)))
+				_ = os.Setenv(tt.args.envVarName, strconv.Itoa(int(tt.want)))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -286,9 +331,9 @@ func TestVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, tt.want)
+				_ = os.Setenv(tt.args.envVarName, tt.want)
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -331,9 +376,9 @@ func TestVarAsBool(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.FormatBool(tt.want))
+				_ = os.Setenv(tt.args.envVarName, strconv.FormatBool(tt.want))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -376,9 +421,9 @@ func TestVarAsInt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.Itoa(tt.want))
+				_ = os.Setenv(tt.args.envVarName, strconv.Itoa(tt.want))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -421,9 +466,9 @@ func TestVarAsInt64(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.Itoa(int(tt.want)))
+				_ = os.Setenv(tt.args.envVarName, strconv.Itoa(int(tt.want)))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -466,9 +511,9 @@ func TestVarAsStringSlice(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strings.Join(tt.want, ","))
+				_ = os.Setenv(tt.args.envVarName, strings.Join(tt.want, ","))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -510,9 +555,9 @@ func TestMandatoryVarAsStringSlice(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strings.Join(tt.want, ","))
+				_ = os.Setenv(tt.args.envVarName, strings.Join(tt.want, ","))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -561,9 +606,9 @@ func TestVarAsFloat64(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, strconv.FormatFloat(tt.want, 'f', 3, 64))
+				_ = os.Setenv(tt.args.envVarName, strconv.FormatFloat(tt.want, 'f', 3, 64))
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
@@ -606,13 +651,13 @@ func Test_getVar(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.shouldSet {
-				os.Setenv(tt.args.envVarName, tt.want)
+				_ = os.Setenv(tt.args.envVarName, tt.want)
 				t.Cleanup(func() {
-					os.Unsetenv(tt.args.envVarName)
+					_ = os.Unsetenv(tt.args.envVarName)
 				})
 			}
 
-			if got := getVar(tt.args.envVarName, tt.args.defaultValue, false); got != tt.want {
+			if got := getVar(tt.args.envVarName, tt.args.defaultValue, ignore); got != tt.want {
 				t.Errorf("getVar() = %v, want %v", got, tt.want)
 			}
 		})
